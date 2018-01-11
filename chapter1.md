@@ -13,12 +13,12 @@ Para las configuraciones cotidianas es necesario manejar el funcionamiento de la
 2. [Aumentar el tiempo de espera de la transferencia](#aumentartirmpo)  
 3. [Borrar entradas de la base de datos de Asterisk](#removerentdb)  
 4. [Callback](#callback)  
-5. [Deshabilitar CHOWN en amportal](#chownamportal) 
+5. [Deshabilitar CHOWN en amportal](#chownamportal)   
 6. [Dumpear variables de canal](#dumpvarcanal)  
-7. Entrar por telnet y loguearse  
-8. Extensiones en DND  
-9. Instalación de G729  
-10. Logueo/deslogueo dinámico en colas  
+7. [Entrar por telnet y loguearse](#telnet)  
+8. [Extensiones en DND](#dnd)  
+9.[ Instalación de G729](#g729)  
+10. [Logueo/deslogueo dinámico en colas](#logincolas)  
 11. Matar canal de agente colgado  
 12. Ocultar caller-ID en llamadas internas  
 13. Originar llamada vía AMI  
@@ -66,6 +66,7 @@ transferdigittimeout = 10      ; Number of seconds to wait between digits when t
 `Elastixi5\*CLI&gt; features reload`
 
 ---
+
 ### Borrar entradas de la base de datos de asterisk {#removerentdb}
 
 ```
@@ -84,7 +85,9 @@ Connected to Asterisk 11.4.0 currently running on elx-diagnosis (pid = 2773)
 elx-cliente*CLI> database deltree CF
 1 database entries removed.
 ```
+
 ---
+
 ### Callback {#callback}
 
 En la cola de atención X, se configura un IVR breakout con un audio donde se le da la opción al llamante de dejar su número para ser contactado más tarde, ya que todos los operadores están ocupados.  
@@ -163,11 +166,12 @@ El funcionamiento sería el siguiente:
 
 * Si llama una persona y cae en la cola 7007 por ejemplo, y accede a dejar su número para ser contactado más tarde, el número de teléfono de la persona se guarda en la base de datos correspondiente a la campaña que corresponda, para ser contactado. En el horario definido en la campaña, y siempre y cuando haya un agente logueado en la cola 7107, se llama automáticamente al número y se lo asigna a un agente de la cola 7107.
   Como todavía no hay agentes en dicha cola, las llamadas NO se disparan, pero quedan los números guardados.
+
 ---
 
 ### Deshabilitar CHOWN en amportal {#chownamportal}
 
-Cambiar el archivo /var/lib/asterisk/bin/freepbx_engine, líneas 218 y 219.
+Cambiar el archivo /var/lib/asterisk/bin/freepbx\_engine, líneas 218 y 219.
 
 ---
 
@@ -350,6 +354,7 @@ BLKVM_CHANNEL=SIP/199-00001a29
 Gracias a ésta función, se determinó que el número de la cola estaba en la variable CALLFILENAME, y se procedió a hacer el CUT.
 
 ---
+
 ### Entrar por telnet y loguearse {#telnet}
 
 ```
@@ -363,6 +368,7 @@ Secret: ********
 Response: Success
 Message: Authentication accepted
 ```
+
 ---
 
 #### Extensiones en DND {#dnd}
@@ -377,7 +383,7 @@ asterisk -rx 'database show'|grep DND
 
 Ir a la siguiente página y seleccionar el binario que corresponda, según la versión de Asterisk y de sistema operativo:
 
-http://asterisk.hosting.lv/#bin
+[http://asterisk.hosting.lv/\#bin](http://asterisk.hosting.lv/#bin)
 
 ```
 [root@nlxmu modules]# pwd
@@ -406,7 +412,7 @@ Ahí debe aparecer el nuevo codec.
 
 ### Logueo/deslogueo dinámico en colas {#logincolas}
 
-En extensions_custom.conf:
+En extensions\_custom.conf:
 
 ```
 [from-internal-custom]
@@ -437,8 +443,8 @@ same => n(LogoffAgente),RemoveQueueMember(3002,Local/${CALLERID(num)}@from-inter
 same => n,Playback(agent-loggedoff)
 same => n,Hangup()
 ```
----
 
+---
 
 
 
