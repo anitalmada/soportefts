@@ -17,7 +17,7 @@ Para las configuraciones cotidianas es necesario manejar el funcionamiento de la
 6. [Dumpear variables de canal](#dumpvarcanal)  
 7. [Entrar por telnet y loguearse](#telnet)  
 8. [Extensiones en DND](#dnd)  
-9.[ Instalación de G729](#g729)  
+9. [ Instalación de G729](#g729)  
 10. [Logueo/deslogueo dinámico en colas](#logincolas)  
 11. Matar canal de agente colgado  
 12. Ocultar caller-ID en llamadas internas  
@@ -445,6 +445,118 @@ same => n,Hangup()
 ```
 
 ---
+### Matar canal de agente colgado {#matarcanal}
+
+```
+[root@cliente-elx eccp-examples]# asterisk -rx 'queue show 9129'
+9129 has 0 calls (max 1) in 'ringall' strategy (2s holdtime, 32s talktime), W:10, C:77, A:4, SL:100.0% within 60s
+   Members: 
+      Agent/129 (ringinuse enabled) (Busy) has taken 67 calls (last was 2609 secs ago)
+   No Callers
+
+[root@cliente-elx eccp-examples]# asterisk -rx 'core show channels'|grep 129
+Agent/129            (None)               Down    (None)
+```
+
+El comando request hangup no hace efecto alguno, por lo que procedemos con un redirect:
+
+```
+[root@cliente-elx eccp-examples]# asterisk -rx 'channel redirect Agent/129 from-internal,199,1'
+Channel 'Agent/129' successfully redirected to from-internal,199,1
+```
+
+Atendí la llamada desde el 199 y corté.
+
+```
+[root@cliente-elx eccp-examples]# asterisk -rx 'core show channels'|grep 129
+AsyncGoto/Agent/129< (None)               Down    (None)
+
+[root@cliente-elx eccp-examples]# asterisk -rx 'queue show 9129'
+9129 has 0 calls (max 1) in 'ringall' strategy (2s holdtime, 32s talktime), W:10, C:77, A:5, SL:100.0% within 60s
+   Members: 
+      Agent/129 (ringinuse enabled) (Unavailable) has taken no calls yet
+   No Callers
+```
+---
+
+### Ocultar CallerID en llamadas internas {#ocultarID}
+
+Cargar la siguiente información en el archivo /etc/asterisk/sip_custom_post.conf:
+
+```
+[715](+)
+setvar=CALLERID(all)="Numero privado"
+
+```
+
+De ésta manera, todas las llamadas del interno 715 a otros internos, les ringueará con ID desconocido.
+
+---
+
+### Originar llamadas vía AMI {#llamadasAMI}
+
+```
+Action: Originate
+Channel: SIP/gsm-gateway/0351156375144
+Exten: s
+Context: from-pstn-custom
+Priority: 1
+Timeout: 30000
+```
+---
+
+### Probar llamada por consola {#llamadaconsola}
+
+Ingresar por ssh al server y en un asterisk cli ejecutar el siguiente comando:
+
+`console dial INTERNO@CONTEXTO`
+
+Por ejemplo:
+
+`console dial 72140@from-internal`
+
+---
+
+### SIPP {#sipp}
+
+`sipp -sn uac -d 200000 -s 1234 127.0.0.1 -l 200 -r 10  -trace_err -error_file sipperror`
+
+1. Instalar primero `yum install sin`
+
+2. Luego habilitar las llamadas SIP anónimas desde Elastix Security
+
+3. Luego en extensions.conf modificar from-sip-external y comentar descomentar como sigue:
+
+```
+;exten => s,n,Playback(ss-noservice)
+exten => s,n,Playback(demo-congrats)
+;exten => s,n,Playtones(congestion)
+;exten => s,n,Congestion(5)
+```
+
+`sipp –h |less`
+```
+               Handy switches of SIPp command line:
+               -sn                                          : Scenario e.g uac, uas
+               -sf                                           : Open customized scenario; usually XML file
+               -d                                            : Duration of each call (in milliseconds)
+               -s                                            : Extension to dial
+               -l                                             : Call limit (Maximum concurrent calls)
+               -r                                             : Calling rate (calls/sec)
+               -trace_err                               : Enable error tracing
+               -error_file  filename             : Dump error in specified file
+
+cat /proc/`pidof asterisk`/limits
+```
+
+
+
+
+
+
+
+
+
 
 
 
