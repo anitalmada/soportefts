@@ -933,12 +933,11 @@ ALTER TABLE queue_stats ADD unique unico (`queue_stats_id`,`uniqueid`,`qagent`,`
 Import data from sql/lang.sql
 ```
 
-UPGRADE TO 2.0.6
+**UPGRADE TO 2.0.6**
 
-ALTER TABLE sched add queues varchar(200) default NULL;
+`ALTER TABLE sched add queues varchar(200) default NULL;`
 
 
-How to Import queue Names for FreePBX in one query:
----------------------------------------------------
+**How to Import queue Names for FreePBX in one query:**
 
 insert into setup (keyword,parameter,value) select 'dict_queue',extension,descr from asterisk.queues_config;
