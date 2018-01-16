@@ -690,23 +690,22 @@ You can put the above command inside the rc.local file so the daemon starts at b
 
 In parselog there is a script to convert and organize queues recordings.
 You have to configure the DB access details and recording directory at the top of the file. It uses some tools that might not be installed in your linux distro (sox, lame), so you might need to tweak it a little bit. You also need to add some tidbits in the dialplan before launching the Queue command, like:
-```
 
+```
 extensions.conf
 
 exten => s,1,Answer
 exten => s,n,Set(__MONITOR_FILENAME=/var/spool/asterisk/monitor/q${EXTEN}-${STRFTIME(${EPOCH},,%Y%m%d-%H%M%S)}-${UNIQUEID})
 exten => s,n,Set(__MONITOR_EXEC=/usr/local/parselog/update_mix_mixmonitor.pl ^{UNIQUEID} ^{MIXMONITOR_FILENAME})
 exten => s,n,Queue(myqueue)
+```
 
-This will instruct asterisk to call the script with some parameters
-after a call is recorded. The script task is to update the mysql tables
-to relate filenames with call ids, and optionally convert them to mp3. 
-(for mp3 convertion to work, recording format must be set to wav and
-lame must be installed)
+This will instruct asterisk to call the script with some parameters after a call is recorded. The script task is to update the mysql tables to relate filenames with call ids, and optionally convert them to mp3. 
+(for mp3 convertion to work, recording format must be set to wav and lame must be installed)
 
 You queue configuration should be set to record calls and use mixmonitor for it:
 
+```
 queues.conf
 
 [myqueue]
@@ -715,40 +714,36 @@ eventwhencalled=yes
 monitor-type=mixmonitor
 monitor-format=wav
 ..
+```
 
+**RECORDINGS AND FreePBX**
 
-RECORDINGS AND FreePBX
-----------------------
-
-If you use FreePBX, you will find a freepbx patch and a custom dialplan
-in the FreePBX directory of this tarball.
+If you use FreePBX, you will find a freepbx patch and a custom dialplan in the FreePBX directory of this tarball.
 
 There are different patches depending on your FreePBX version:
 
-For version 2.8 or older:  fpbxmonitor.diff
-For version 2.9:           fpbxmonitor29.diff
-For version 2.10:          fpbxmonitor210.diff
-For version 2.11:          no need to patch. You need to configure FreePBX manually
+For version 2.8 or older: fpbxmonitor.diff
+For version 2.9: fpbxmonitor29.diff
+For version 2.10: fpbxmonitor210.diff
+For version 2.11: no need to patch. You need to configure FreePBX manually
 
 
-You will need to apply that patch to FreePBX in order to have the queue
-recordings integrated in the reports. You can do so with the following
-commands (change the path to the directory where you extracted the tarball):
+You will need to apply that patch to FreePBX in order to have the queue recordings integrated in the reports. You can do so with the following commands (change the path to the directory where you extracted the tarball):
 
 For version 2.8:
 
-cd /var/www/html/admin/modules/queues
-patch < /path/to/FreePBX/fpbxmonitor.diff
+`cd /var/www/html/admin/modules/queues`
+`patch < /path/to/FreePBX/fpbxmonitor.diff`
 
 For version 2.9:
 
-cd /var/www/html/admin/modules/queues
-patch < /path/to/FreePBX/fpbxmonitor29.diff
+`cd /var/www/html/admin/modules/queues`
+`patch < /path/to/FreePBX/fpbxmonitor29.diff`
 
 For version 2.10:
 
-cd /var/www/html/admin/modules/core
-patch < /path/to/FreePBX/fpbxmonitor210.diff
+`cd /var/www/html/admin/modules/core`
+`patch < /path/to/FreePBX/fpbxmonitor210.diff`
 
 For version 2.11:
 
@@ -756,79 +751,57 @@ You will need to open SETTINGS - Advanced Settings and under the
 option DEVELOPER AND CUSTOMIZATION you need to set the field 
 POST CALL RECORDING SCRIPT to:
 
-/usr/local/parselog/update_mix_mixmonitor.pl ^{UNIQUEID} ^{MIXMONITOR_FILENAME}
+`/usr/local/parselog/update_mix_mixmonitor.pl ^{UNIQUEID} ^{MIXMONITOR_FILENAME}`
 
-If you do not see that option, you will need to enable the options to
-allow modification of read only settings at the top of Advanced Settings.
+If you do not see that option, you will need to enable the options to allow modification of read only settings at the top of Advanced Settings.
 
-After the patch is applied or the configuration is made, you will have 
-to make a change on FreePBX web UI and apply changes so the dialplan 
-is regenerated. The above patch will call the following script:
+After the patch is applied or the configuration is made, you will have to make a change on FreePBX web UI and apply changes so the dialplan is regenerated. The above patch will call the following script:
 
-/usr/local/parselog/update_mix_mixmonitor.pl
+`/usr/local/parselog/update_mix_mixmonitor.pl`
 
-Be sure to update the script and tweak it to your needs. Basically, be sure
-to change the following parameters if needed:
+Be sure to update the script and tweak it to your needs. Basically, be sure to change the following parameters if needed:
 
-$config{'asterisk_spool'} = "/var/spool/asterisk/monitor";
-$config{'destination_dir'} = "/var/spool/asterisk/asternic";
+`$config{'asterisk_spool'} = "/var/spool/asterisk/monitor";`
+`$config{'destination_dir'} = "/var/spool/asterisk/asternic";`
 
-The later is the directory where you want to store mp3 recordings. The script
-will archive recordings in subdirectories using the YYYYMMDD scheme, inside it.
-You will have to create that directory if it does not exists, and you must be
-sure the owner of the directory is the "asterisk" user.
+The later is the directory where you want to store mp3 recordings. The script will archive recordings in subdirectories using the YYYYMMDD scheme, inside it.
+You will have to create that directory if it does not exists, and you must be sure the owner of the directory is the "asterisk" user.
 
-You can also convert scripts to mp3 within the script, in that case be sure you
-have:
+You can also convert scripts to mp3 within the script, in that case be sure you have:
 
-$config{'convertmp3'} = true;
+`$config{'convertmp3'} = true;`
 
-mp3 convertion requires the utility "lame" to be installed in /usr/bin. If you do
-not have the utility or if its installed in some other directory, modify the
-script accordingly. Also, be sure the recording format in FreePBX queue config
-is set to "wav" (not wav49 or gsm or any other format).
+mp3 convertion requires the utility "lame" to be installed in /usr/bin. If you do not have the utility or if its installed in some other directory, modify the script accordingly. Also, be sure the recording format in FreePBX queue config is set to "wav" (not wav49 or gsm or any other format).
 
-You can also set convertmp3 to false and the original recording format as set in
-FreePBX queue config will be preserved. Asternic 2.0 supports audio streaming for
-.wav and .gsm files.
+You can also set convertmp3 to false and the original recording format as set in FreePBX queue config will be preserved. Asternic 2.0 supports audio streaming for .wav and .gsm files.
 
 
-OUTBOUND CALL TRACKING AND FreePBX
-----------------------------------
+**OUTBOUND CALL TRACKING AND FreePBX**
 
-The other file in the FreePBX directory is a dialplan to use with asterisk
-to track outbound calls. The included one will only track calls if you set
-the account code to something before performing the dial (it could be added
-to the extension configuration for example). The filename is:
+The other file in the FreePBX directory is a dialplan to use with asterisk to track outbound calls. The included one will only track calls if you set the account code to something before performing the dial (it could be added to the extension configuration for example). The filename is:
 
-extensions_custom_asternic_outbound_freepbx.conf
+`extensions_custom_asternic_outbound_freepbx.conf`
 
-You have to include that file from your dialplan, you can do so by adding
-"#include extensions_custom_asternic_outbound_freepbx.conf" at the end
+You have to include that file from your dialplan, you can do so by adding "#include xtensions_custom_asternic_outbound_freepbx.conf" at the end
 of /etc/asterisk/extensions_custom.conf
 
 
-OUTBOUND CALL TRACKING (no FreePBX)
------------------------------------
+**OUTBOUND CALL TRACKING (no FreePBX)**
 
 In the docs directory you have the README.outbound with a sample dialplan.
-You will need to tweak it heavily in order to suit your needs. The example
-uses a 3 digit prefix and fixed trunk.
+You will need to tweak it heavily in order to suit your needs. The example uses a 3 digit prefix and fixed trunk.
 
-MAINTENANCE
------------
+**MAINTENANCE**
 
 If you want to clear/purge the tables run tailqueuelog with
 the purge parameter:
 
-./tailqueuelog -u root --purge
+` ./tailqueuelog -u root --purge`
 
-Attention! It will remove all queue activity from the logs so you
-can start afresh.
+Attention! It will remove all queue activity from the logs so you can start afresh.
 
 
-ACCESING STATS
---------------
+**ACCESING STATS**
 
 Point your browser to the new url. There are two default users:
 
@@ -837,58 +810,49 @@ user, password user
 
 You should login as admin first and set user permissions.
 
-IMPORTANT!!!! ******************************************************
- You should go to USER ACCESS tab and at least select ALL QUEUES 
- and ALL AGENTS for the admin user. After you have some data in the
- tables you can refine the user access as you wish. But the default
- install DOES NOT permit viewing ANY queues or agents, so you will
- be stuck in the HOME page until you set them up.
-********************************************************************
+_IMPORTANT!!!!_
+_You should go to USER ACCESS tab and at least select ALL QUEUES 
+and ALL AGENTS for the admin user. After you have some data in the tables you can refine the user access as you wish. But the default install DOES NOT permit viewing ANY queues or agents, so you will be stuck in the HOME page until you set them up._
 
-Agent and Queue data are not displayed until you start populating mysql
-with the parselog scripts.  
+Agent and Queue data are not displayed until you start populating mysql with the parselogscripts.  
 
 
-UPDATING THE queue_stats TABLE FROM ASTERNIC 1.6 OR PREVIOUS 
-------------------------------------------------------------
+**UPDATING THE queue_stats TABLE FROM ASTERNIC 1.6 OR PREVIOUS**
 
-Transfers now are logged with a forth parameter in queue_log, you have to
-alter the queue_stats table and then update records in order to store
-information correctly:
+Transfers now are logged with a forth parameter in queue\_log, you have to alter the queue_stats table and then update records in order to store information correctly:
 
+```
 ALTER TABLE queue_stats ADD info4 varchar(40) default '';
 
 UPDATE queue_stats SET info4=substring_index(info3,'|',-1),info3=substring_index(info3,'|',1) WHERE info3 like '%|%';
+```
 
+**UPDATING THE users TABLE FOR ASTERNIC 1.9 AND ENCRYPTED PASSWORDS**
 
-UPDATING THE users TABLE FOR ASTERNIC 1.9 AND ENCRYPTED PASSWORDS
------------------------------------------------------------------
-
+```
 ALTER TABLE users CHANGE password password varchar(100);
 
 UPDATE users SET password=sha1(password);
+```
 
+**UPDATING THE queue_stats TABLE FROM ASTERNIC TO VERSION 1.9.2**
 
-UPDATING THE queue_stats TABLE FROM ASTERNIC TO VERSION 1.9.2
--------------------------------------------------------------
-
+```
 ALTER TABLE queue_stats ADD info5 varchar(40) default '';
 
 UPDATE queue_stats SET info5=substring_index(info4,'|',-1),info4=substring_index(info4,'|',1) WHERE info4 like '%|%';
+```
 
+**UPDATING THE queue_stats TABLE FROM ASTERNIC TO VERSION 1.9.3**
 
-UPDATING THE queue_stats TABLE FROM ASTERNIC TO VERSION 1.9.3
--------------------------------------------------------------
-
+```
 ALTER TABLE setup CHANGE value value varchar(255);
+```
 
 
+**UPGRADE TO 2.0**
 
-
-
-UPGRADE TO 2.0
---------------
-
+```
 CREATE TABLE IF NOT EXISTS `userqname` (
   `users_id` int(6) default NULL,
   `qname_queue_id` int(6) default NULL
@@ -967,7 +931,7 @@ ALTER TABLE queue_stats DROP INDEX unico;
 ALTER TABLE queue_stats ADD unique unico (`queue_stats_id`,`uniqueid`,`qagent`,`qevent`,`qname`);
 
 Import data from sql/lang.sql
-
+```
 
 UPGRADE TO 2.0.6
 
