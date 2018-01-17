@@ -8,7 +8,7 @@ Es un módulo de estadísticas orientado a las necesidades de los call centers.
 4. [Enviar llamadas entrantes por líneas FXO a colas, por consola](#llamadafxocolas)
 5. [Forma para que desaparezca Agent con la barra](#desapareceragent)
 6. [Asternic PRO - Instalación](#asternicpro)
-7. 
+7. [Reinserción de datos en la base qstats](#reinserciondatos)
 
 
 
@@ -941,3 +941,26 @@ Import data from sql/lang.sql
 **How to Import queue Names for FreePBX in one query:**
 
 insert into setup (keyword,parameter,value) select 'dict_queue',extension,descr from asterisk.queues_config;
+
+---
+### Reinserción de datos en la base qstats {#reinserciondatos}
+
+El tailqueuelog no va a tratar de insertar registros anteriores al más reciente registrado (por motivos de eficiencia). Ahora bien, eso impide que se reparseen los eventos viejos que hayan podido perderse por un crash o similar.
+
+Una opción es comentar la linea de tailqueuelog que realiza dicho chequeo por fecha (las versiones más recientes de asternic tienen un proceso de parseo que se llama asterniclog al que se le puede pasar el parámetro -r para que haga el reparseo, sin necesidad de modificar código).
+Si se está usando tailqueuelog, se debe modificar el código para hacer el reparseo, solo una linea que hay que comentar (alrededor de la línea 434):
+
+```
+&reconecta();
+&last_event();
+&initial_load();```
+
+Tenés que comentar la línea que llama a last_event():
+
+&reconecta();
+#&last_event();
+&initial_load();
+
+luego de eso, tendrás que detener con kill el tailqueuelog que esté corriendo, y ejecutalo nuevamente a mano desde consola como hiciste anteriormente. Esta vez si va a insertar o intentar insertar todos los registros del log, incluído registros viejos (por lo que va a demorar un buen rato y vas a ver montones de errores de RECORD NOT INSERTED, DUPLICATE o parecido. Eso es normal, ya que va a tratar de insertar lo que ya existe.
+
+Cuando termine, revisá que esté ok corriendo un reporte de ese día. Luego edita el archivo nuevamente, sacale el # a la línea e iniciá tailqueuelog normalmente.
