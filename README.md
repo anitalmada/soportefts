@@ -1,6 +1,6 @@
 # Soporte Técnico Freetech
 
-This file file serves as your book's preface, a great place to describe your book's content and ideas.Este material está orientado a sistematizar la información necesaria para las tareas que se desarrollan dentro del equipo de Soporte Técnico de Freetech Solutions.
+Este material está orientado a sistematizar la información necesaria para las tareas que se desarrollan dentro del equipo de Soporte Técnico de Freetech Solutions.
 
 Está organizado por capítulos que cuentan con material sobre cada una de las plataformas o herramientas necesarias para la asistencia a clientes, implementaciones, testeos y resolución de tickets.
 
