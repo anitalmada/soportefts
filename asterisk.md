@@ -9,21 +9,6 @@ Para las configuraciones cotidianas es necesario manejar el funcionamiento de la
 ---
 
 **Contenidos del capítulo:**  
-1. [Agregar CF por consola](#agregarcf)  
-2. [Aumentar el tiempo de espera de la transferencia](#aumentartirmpo)  
-3. [Borrar entradas de la base de datos de Asterisk](#removerentdb)  
-4. [Callback](#callback)  
-5. [Deshabilitar CHOWN en amportal](#chownamportal)   
-6. [Dumpear variables de canal](#dumpvarcanal)  
-7. [Entrar por telnet y loguearse](#telnet)  
-8. [Extensiones en DND](#dnd)  
-9. [ Instalación de G729](#g729)  
-10. [Logueo/deslogueo dinámico en colas](#logincolas)  
-11. [Matar canal de agente colgado](#matarcanal)
-12. [Ocultar caller-ID en llamadas internas](#ocultarID)  
-13. [Originar llamada vía AMI](#llamadasAMI)  
-14. [Probar llamadas por consola](#llamadaconsola)  
-15. [SIPP](#sipp)
 
 ---
 
