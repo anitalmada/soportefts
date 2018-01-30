@@ -2,13 +2,7 @@
 Es un módulo de estadísticas orientado a las necesidades de los call centers. 
 
 ### Contenido
-1. [Agregar salientes a Asternic](#aggsalientes)
-2. [Call Center Asternic](#callcenter)
-3. [Eliminar datos de qstats](#eliminarqstats)
-4. [Enviar llamadas entrantes por líneas FXO a colas, por consola](#llamadafxocolas)
-5. [Forma para que desaparezca Agent con la barra](#desapareceragent)
-6. [Asternic PRO - Instalación](#asternicpro)
-7. [Reinserción de datos en la base qstats](#reinserciondatos)
+
 
 
 

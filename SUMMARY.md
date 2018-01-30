@@ -19,4 +19,15 @@
     * [SIPP](./asterisk.md#sipp)
 
 * [Asternic](asternic.md)
+    * [Agregar salientes a Asternic](./asternic.md#aggsalientes)
+    * [Call Center Asternic](./asternic.md#callcenter)
+    * [Eliminar datos de qstats](./asternic.md#eliminarqstats)
+    * [Enviar llamadas entrantes por líneas FXO a colas, por consola](./asternic.md#llamadafxocolas)
+    * [Forma para que desaparezca Agent con la barra](./asternic.md#desapareceragent)
+    * [Asternic PRO - Instalación](./asternic.md#asternicpro)
+    * [Reinserción de datos en la base qstats](./asternic.md#reinserciondatos)
+
+
+
+
 
