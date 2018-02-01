@@ -960,3 +960,6 @@ Tenés que comentar la línea que llama a last_event():
 luego de eso, tendrás que detener con kill el tailqueuelog que esté corriendo, y ejecutalo nuevamente a mano desde consola como hiciste anteriormente. Esta vez si va a insertar o intentar insertar todos los registros del log, incluído registros viejos (por lo que va a demorar un buen rato y vas a ver montones de errores de RECORD NOT INSERTED, DUPLICATE o parecido. Eso es normal, ya que va a tratar de insertar lo que ya existe.
 
 Cuando termine, revisá que esté ok corriendo un reporte de ese día. Luego edita el archivo nuevamente, sacale el # a la línea e iniciá tailqueuelog normalmente.
+
+---
+
