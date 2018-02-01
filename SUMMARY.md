@@ -35,7 +35,8 @@
   * [Comandos útiles en Elastix](./elastix.m#comandosutiles)
   * [Consulta sqlite para ver los vendors soportados](./elastix.md#consultavendors)
   * [DUNDi - Arreglar conexionaes a nivel sqlite](./elastix.md#dundisqlite)
-  * 
+  * [Extensión de prueba](./elastix.md#extensiontest)
+  * [FXOtune](./elastix.md#fxotune)
   
   
 

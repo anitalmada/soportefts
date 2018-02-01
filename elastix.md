@@ -989,4 +989,54 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ---
+###Extensión de prueba {#extensiontest}
+
+Ir a PBX ---> Misc Applications
+Agregar una descripción
+Poner un código, que va a ser el que desde una extensión se disque para acceder a esa aplicación
+Setear el destination.
+
+---
+###FXOtune {#fxotune}
+
+    #amportal stop
+
+    ~#fxotune -d -b 1
+    d=dump results
+    i=calibrate echo settings
+    b= device (cat /proc/dahdi/X) --> ojo que suele ser /dev/dahdi/X (X=ports)
+
+    Dumping module /dev/dahdi/1
+
+    echo ratio = 0.2886 (1305.9 / 4557.0)
+    Done!
+
+    Dumping module /dev/dahdi/2
+    echo ratio = 0.3889 (1544.3 / 4557.0)
+    Done!
+
+
+    ~#fxotune -i 5
+    i = calibrate echo settings
+    5= string to dial to clear the line, default is 5
+
+    ~#fxotune -s
+    s=set calibrated settings
+
+Volvemos a cargar los resultados para ver si estos bajaron los niveles de eco.
+
+    Dumping module /dev/dahdi/1
+    echo ratio = 0.0096 (51.9 / 4457.0)
+    Done!
+
+    Dumping module /dev/dahdi/2
+    echo ratio = 0.0068 (43.7 / 4457.0)
+    Done!
+
+    ~#amportal start
+
+Nota: Es necesario ejecutar `fxotune -s` después de cada test
+
+---
+
 
