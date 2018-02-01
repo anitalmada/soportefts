@@ -802,4 +802,45 @@ Debe llevar la eth de replicacion.
 *NOTA2:* tener el cuenta el parámetro BINDADDR en Freepbx, debe tener la IP flotante.
 
 ---
+###Cluster HA - Particionado de disco {#clusterparticionado}
+
+*Particionado:*
+En la guía de instalación, se parte de un diseño predeterminado seleccionando el disco (en el ejemplo, se usa un disco chico):
+![](/assets/ClusterHA_Particionado0.png)
+
+
+Luego se acepta la modificación de la capa de particiones:
+![](/assets/ClusterHA_Particionado1.png)
+
+
+Se clickea en NUEVO, sobre el Espacio Libre:
+
+![](/assets/ClusterHA_Particionado2.png)
+
+BOOT: se crea la partición /boot del tipo ext3 con un tamaño de 100MB:
+
+![](/assets/ClusterHA_Particionado3.png)
+
+
+SWAP: se crea una partición del tipo swap con un tamaño en megas igual al doble de RAM (ej: para 8 GB de RAM pondríamos 16000)
+![](/assets/ClusterHA_Particionado4.png)
+
+TMP: Seteamos una partición /tmp con un tamaño de 50 gigas:
+
+![](/assets/ClusterHA_Particionado5.png)
+
+RAÍZ: Se crea un partición raíz (/) con un tamaño igual a 40 gigas (40000):
+![](/assets/ClusterHA_Particionado6.png)
+
+Finalmente se deja todo el espacio libre restante sin usar, y se procede con la instalación normal del sistema.
+Cuando se llegue a la parte de Direccionamiento IP, deberíamos encontrarnos con 2 interfaces:
+
+- eth0: que se usara como IP de producción 1
+- eth1: que se usará como IP de heartbeat (el direccionamiento aquí es interno, ya que esta placa se usará para conectar físicamente en punto a punto el otro nodo para enlace de heartbeat: ej. 192.168.100.1/255.255.255.0).
+
+Mismo procedimiento de particionado debe seguirse en el otro nodo, especificando una IP de heartbeat dentro del rango (ejemplo: 192.168.100.2/255.255.255.0).
+
+La capa de particiones debe quedar "exacta" en ambos nodos, con mismo valor de espacio libre.
+
+---
 
