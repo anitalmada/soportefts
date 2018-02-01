@@ -38,6 +38,6 @@
   * [Extensión de prueba](./elastix.md#extensiontest)
   * [FXOtune](./elastix.md#fxotune)
   * [Grabar todas las llamadas entrantes por un DID particular](./elastix.md#grabarllamxdid) 
-  
+  * [Habilitar detección de cortes en placas con puertos FXO](./elastix.md#deteccióncortefxo)
   
 

@@ -1089,5 +1089,19 @@ ${Mimesend} -t ${To} -s "${Subject}" -f /tmp/${CallerID}.txt -f ${Filemp3}.mp3
 ${Rm} -f /tmp/${CallerID}.txt
 ${Rm} -f ${File}
 ```
+---
+###Habilitar detección de cortes en placas con puertos FXO {#deteccióncortefxo}
 
+1. Descomentar las siguientes 2 líneas en `/etc/asterisk/chan_dahdi.conf`:
+
+    ;Uncomment these lines if you have problems with the     disconection of your analog lines
+    busydetect=yes
+    busycount=3
+
+2. Hacer un reload del módulo de dahdi:
+
+    asterisk -r
+    module reload chan_dahdi.so
+
+---
 
