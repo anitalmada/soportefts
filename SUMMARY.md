@@ -27,5 +27,9 @@
   * [Reinserción de datos en la base qstats](./asternic.md#reinserciondatos)
 * [Elastix](elastix.md)
   * [Elastix - Actualización de repositorios para que funcionen los updates](./elastix.md#actualizarepos)
+  * [Analizar colas de mails](./elastix.md#colasmails)
+  * [Arreglar los faxes virtuales cuando dejan de funcionar](./elastix.md#arreglarfax)
+  * [Backup and restore de Elastix](./elastix.md#bckuprestore)
+  
   
 

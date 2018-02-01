@@ -133,5 +133,673 @@ someuser@example.com
 
 ---
 
+###Arreglar los faxes virtuales cuando dejan de funcionar {#arreglarfax}
 
+Hay veces que al parar iaxmodem y hylafax, los procesos faxgetty quedan corriendo y no pueden pararse con kill.
+Entonces, se debe comentar las líneas referidas a los faxgetty en `/etc/inittab`, correr `init q` para forzar que se re-lea dicho archivo, y después killear los faxgetty.
+Luego, levantar iaxmodem, hylafax y los procesos faxgetty de forma manual:
+
+`service iaxmodem start`
+`service hylafax start`
+
+```
+/usr/sbin/faxgetty ttyIAX1 &
+/usr/sbin/faxgetty ttyIAX2 &
+...
+...
+...
+```
+
+---
+###Backup and restore de Elastix {#bckuprestore}
+
+1) Ambos servers donde se realizará el backup and restore, deben estar exactamente en las mismas versiones. En este caso, corrí un "yum update" en ambos servers, y sólamente el ALX tenía paquetes disponibles a ser actualizados (entre ellos, FreePBX).
+
+2) En el ALX procedí a realizar un backup, desde el menú "Sistema > Respaldar/Restaurar". Allí, seleccioné la opción "Crear un respaldo...", seleccioné todas las opciones, y luego des-tildé "Monitoreos (Contenido Pesado)", "Correo de Voz (Contenido Pesado)", y "Archivos de configuración del panel de operaciones".
+Las 2 opciones de contenido pesado, es para evitar que se realice un backup de las grabaciones y de los voicemails de los internos, agregando en vano varios gigas al archivo de backup. Y la tercer opción, es para evitar un backup de FOP, que al tratarse de un addon desarrollado por un tercero, puede traer inconvenientes.
+
+3) El backup hecho en la página, crea un archivo en el ALX en el directorio `/var/www/backup`, del tipo "elastixbackup-20150724154014-c2.tar". Dicho archivo, fue copiado al MiniUCS vía SSH, en el mismo directorio `/var/www/backup`.
+
+4) En el MiniUCS procedí a realizar el restore, desde el menú "Sistema > Respaldar/Restaurar". En el listado de respaldos, ya aparece el archivo copiado en el paso anterior, por lo que se procede a seleccionarlo y a la opción "Restaurar".
+
+5) Una vez finalizado el restore desde la web, accedí vía SSH al MiniUCS para hacer un restore de las contraseñas. Para ello, se ejecuta el siguiente comando:
+
+`[root@elxcliente ~]# elastix-admin-passwords --change`
+
+Se vuelven a setear las contraseñas que se solicitan (web, freepbx, mysql, etc.).
+
+6) Reboot.
+
+---
+
+###Cambiar pass de admin web, por consola
+
+```
+sqlite3 /var/www/db/acl.db "UPDATE acl_user SET md5_password = '`echo -n NUEVO-PASSWORD|md5sum|cut -d ' ' -f 1`' WHERE name = 'admin'"
+```
+---
+
+###Cluster de 64bits {#cluster}
+
+**En ambos nodos:**
+
+* Particionar: 1024 x N ----> / ext3. 1024 x N ----> Swap 
+Reboot
+
+`yum update`
+`yum install heartbeat.x86_64 drbd83.x86_64 kmod-drbd83.x86_64`
+
+- Editar el archivo `/etc/hosts` en cada nodo:
+
+```
+xxx.xxx.xxx.xxx pbxa.example.com    pbxa
+xxx.xxx.xxx.xxx pbxb.example.com    pbxb
+```
+
+Donde XXX.XXX.XXX.XXX es la IP de las placas de red de réplica (eth1).
+* Comprobar que ambos nodos se "vean" a través de su IP ETH1.
+
+**Trabajar sobre la partición DRBD (en cada nodo)**
+
+Es importante que las particiones tengan el mismo tamaño. Si los discos y la tabla de partición de ambos nodos son idénticos simplemente creamos la partición utilizando el resto del espacio disponible. 
+Por el contrario, debemos dimensionar esta nueva partición utilizando un tamaño en Megabytes (por ejemplo).
+
+Nueva particion "n", primaria "p", numero "3", tamaño "+(1024 * X)M".
+Ingresar "t" para cambiar formato, elegir particion "3", indicar formato "83", imprimir la tabla "p".
+
+`fdisk /dev/sda`
+`1024 x N`
+
+Corroborar que queden iguales con `fdisk -l`
+
+Si todo está ok, guardar cambios.
+
+- Formatear la nueva particion en cada server: 
+
+    `mke2fs -j /dev/sda3`
+    `dd if=/dev/zero bs=1M count=1 of=/dev/sda3; sync`
+
+* Configurar /etc/drbd.conf en el nodo 1.
+
+```
+global { usage-count no; }
+resource r0 {
+protocol C;
+startup { wfc-timeout 10; degr-wfc-timeout 30; }
+disk { on-io-error detach; }
+net {
+        after-sb-0pri discard-younger-primary; 
+        after-sb-1pri discard-secondary;
+        after-sb-2pri call-pri-lost-after-sb;
+        cram-hmac-alg "sha1";
+        shared-secret "31asT1X666";
+        }
+
+syncer { rate 100M; }
+on pbxa.example.com {
+        device /dev/drbd0;
+        disk /dev/sda3;
+        address xxx.xxx.xxx.xx1:7788;
+        meta-disk internal;
+        }
+on pbxb.example.com {
+        device /dev/drbd0;
+        disk /dev/sda3;
+        address xxx.xxx.xxx.xx2:7788;
+        meta-disk internal;
+        } 
+}
+```
+
+Donde xxx.xxx.xx1 es la IP del la interfaz de cluster del server 1 y xxx.xxx.xxx.xx2 es la del server 2.
+
+* Copiar el archivo generado desde el nodo 1 al nodo 2.
+
+    `scp /etc/drbd.conf root@pbxb.example.com:/etc/`
+
+* Inicializar el sector del disco DRBD (metadata). En ambos nodos ejecutar:
+
+    `drbdadm create-md r0`
+
+* Levantar el servicio DRBD. En ambos nodos: 
+
+    `service drbd start`
+    
+* Comprobar si ambos servers están como "secundarios". En ambos nodos: 
+
+    `cat /proc/drbd`
+
+Deberíamos observar los dos en secondary/secondary
+
+Ahora vamos a iniciar como nodo primario al pbxa.
+
+**Solo en el pbxa:** 
+
+    drbdadm -- --overwrite-data-of-peer primary r0
+
+En el nodo pbxb se puede comprobar la sincronización: 
+
+    cat /proc/drbd
+    
+* Ahora vamos a formatear el nuevo device /dev/drbd0 y vamos a montarlo en un directorio /replica que vamos a crear.
+
+**En ambos nodos:**
+
+    mkdir /replica
+
+**Solo en el pbxa:**
+
+```
+    mkfs.ext3 /dev/drbd0 
+    tune2fs -c 0 -i 0 /dev/drbd0
+    mount /dev/drbd0 /replica
+```
+    
+* Comprobamos el rol de cada nodo, el pbxa debería arrojar: `Primary/Secondary` y el pbxb: `Secundary/Primary`
+
+    `drbdadm role r0`
+
+- Replicar directorios y archivos del sistema en el nodo a
+
+```
+cd /replica
+tar czvf etc-asterisk.tgz /etc/asterisk
+tar czvf etc-asterisk.elastix.tgz /etc/asterisk.elastix
+tar czvf opt-lcdelastix.tgz /opt/lcdelastix
+tar czvf usr-lib-asterisk.tgz /usr/lib64/asterisk
+tar czvf var-lib-asterisk.tgz /var/lib/asterisk
+tar czvf var-lib-mysql.tgz /var/lib/mysql
+tar czvf var-www.tgz /var/www
+tar czvf var-spool-asterisk.tgz /var/spool/asterisk
+tar czvf tftpboot.tgz /tftpboot
+
+tar xzvf etc-asterisk.tgz
+tar xzvf etc-asterisk.elastix.tgz
+tar xzvf opt-lcdelastix.tgz
+tar xzvf usr-lib-asterisk.tgz
+tar xzvf var-lib-asterisk.tgz
+tar xzvf var-lib-mysql.tgz
+tar xzvf var-www.tgz
+tar xzvf var-spool-asterisk.tgz
+tar xzvf tftpboot.tgz
+cp -p /etc/odbc.ini /replica
+cp -p /etc/amportal.conf /replica
+cp -p /etc/freepbx.conf /replica
+
+rm -rf /etc/asterisk
+rm -rf /etc/asterisk.elastix
+rm -rf /opt/lcdelastix
+rm -rf /usr/lib64/asterisk
+rm -rf /var/lib/asterisk
+rm -rf /var/lib/mysql
+rm -rf /var/www
+rm -rf /var/spool/asterisk
+rm -rf /tftpboot
+rm -rf /etc/odbc.ini 
+rm -rf /etc/amportal.conf 
+rm -rf /etc/freepbx.conf 
+
+ln -s /replica/etc/asterisk /etc/asterisk
+ln -s /replica/etc/asterisk.elastix /etc/asterisk.elastix
+ln -s /replica/opt/lcdelastix /opt/lcdelastix
+ln -s /replica/usr/lib64/asterisk /usr/lib64/asterisk
+ln -s /replica/var/lib/asterisk /var/lib/asterisk
+ln -s /replica/var/lib/mysql /var/lib/mysql
+ln -s /replica/var/www /var/www
+ln -s /replica/var/spool/asterisk /var/spool/asterisk
+ln -s /replica/tftpboot /tftpboot
+ln -s /replica/odbc.ini /etc/odbc.ini 
+ln -s /replica/amportal.conf /etc/amportal.conf 
+ln -s /replica/freepbx.conf /etc/freepbx.conf 
+```
+
+* Bajar servicios
+
+    `service httpd stop`
+    `service asterisk stop`
+    `service mysqld stop`
+    
+Cambiar el nodo b a primario y trabajar sobre la réplica
+    
+**En pbxa:** 
+
+    umount /replica
+    drbdadm secondary r0
+    
+**En pbxb:**
+
+    drbdadm primary r0
+    mount /dev/drbd0 /replica
+    ls /replica/
+    
+* En ambos comprobar roles: 
+
+    `drbdadm role r0`
+    
+* Trabajar sobre la replicación de archivos.
+
+```
+rm -rf /etc/asterisk
+rm -rf /etc/asterisk.elastix
+rm -rf /opt/lcdelastix
+rm -rf /usr/lib64/asterisk
+rm -rf /var/lib/asterisk
+rm -rf /var/lib/mysql
+rm -rf /var/www
+rm -rf /var/spool/asterisk
+rm -rf /tftpboot
+rm -rf /etc/odbc.ini 
+rm -rf /etc/amportal.conf 
+rm -rf /etc/freepbx.conf 
+
+ln -s /replica/etc/asterisk /etc/asterisk
+ln -s /replica/etc/asterisk.elastix /etc/asterisk.elastix
+ln -s /replica/opt/lcdelastix /opt/lcdelastix
+ln -s /replica/usr/lib64/asterisk /usr/lib64/asterisk
+ln -s /replica/var/lib/asterisk /var/lib/asterisk
+ln -s /replica/var/lib/mysql /var/lib/mysql
+ln -s /replica/var/www /var/www
+ln -s /replica/var/spool/asterisk /var/spool/asterisk
+ln -s /replica/tftpboot /tftpboot
+ln -s /replica/odbc.ini /etc/odbc.ini 
+ln -s /replica/amportal.conf /etc/amportal.conf 
+ln -s /replica/freepbx.conf /etc/freepbx.conf 
+```
+
+* Bajar servicios
+
+    `service mysqld stop`
+    `service httpd stop`
+    `service asterisk stop`
+    
+* Volver al pbxa como primario
+
+**En pbxb:**
+
+    umount /replica
+    drbdadm secondary r0
+    
+**En pbxa**
+
+    drbdadm primary r0
+    mount /dev/drbd0 /replica
+    ls /replica/
+    
+**En ambos:**
+ 
+    drbdadm role r0
+
+
+* Configuración de Heartbeat
+
+Desactivo y bajo los servicios que va a manejar HA (en **ambos nodos**) 
+
+    chkconfig asterisk off 
+    chkconfig mysqld off 
+    chkconfig httpd off 
+    service mysqld stop 
+    service asterisk stop 
+    service httpd stop
+
+* Crear el archivo `/etc/ha.d/ha.cf` con el siguiente contenido:
+
+```
+debugfile /var/log/ha-debug
+logfile /var/log/ha-log
+logfacility local0 
+keepalive 2
+deadtime 30
+warntime 10
+initdead 120
+udpport 694
+bcast eth1 
+auto_failback off
+node pbxa.example.com
+node pbxb.example.com
+```
+
+* Crear el archivo `/etc/ha.d/authkeys` con el siguiente contenido:
+
+    `auth 1`
+    `1 sha1 MySecret` 
+    
+
+* Asignar permisos: 
+
+    `chmod 600 /etc/ha.d/authkeys`
+
+* Crear el archivo /etc/ha.d/haresources con el sgte contenido:
+
+```
+pbxa.example.com drbddisk::r0 Filesystem::/dev/drbd0::/replica::ext3 IPaddr::xxx.xxx.xxx.xxx/24/eth0/xxx.xxx.xxx.255 mysqld asterisk httpd
+```
+
+Donde xxx.xxx.xxx.xxx es la IP flotante del cluster y xxx.xxx.xxx.255 es la IP de broadcast.
+
+* Copiar los archivos de HA en el nodo pbxb
+
+    `scp /etc/ha.d/ha.cf /etc/ha.d/authkeys /etc/ha.d/haresources root@pbxb.example.com:/etc/ha.d/`
+    
+* Levantar heartbeat en ambos nodos y dejarlo para que levante en el runlevel 3
+
+    `service heartbeat start`
+    `chkconfig heartbeat on`
+
+Reboot en ambos servidores y el cluster debería comenzar a funcionar.
+
+*NOTA:* ojo con el archivo: `/etc/ha.d/ha.cf` y `/etc/ha.d/haresources` ya que llevan el nombre de la interfaz `eth` (eth0, eth1, etc.). Debe llevar la eth de replicación.
+
+*NOTA2:* tener el cuenta el parámetro BINDADDR en Freepbx, debe tener la IP flotante.- En ambos nodos:
+
+* Particionar: 1024 x N ----> / ext3. 1024 x N ----> Swap 
+
+    `Reboot`
+    `yum update`
+    `yum install heartbeat.x86_64 drbd83.x86_64 kmod-drbd83.x86_64`
+
+- Editar el archivo /etc/hosts en cada nodo:
+
+```
+xxx.xxx.xxx.xxx pbxa.example.com    pbxa
+xxx.xxx.xxx.xxx pbxb.example.com    pbxb
+```
+
+Donde XXX.XXX.XXX.XXX es la IP de las placas de red de réplica (eth1).
+Comprobar que ambos nodos se "vean" a través de su IP ETH1.
+
+* Trabajar sobre la partición DRBD (en cada nodo)
+
+Es importante que las particiones tengan el mismo tamaño. Si los discos y la tabla de partición de ambos nodos son idénticos simplemente creamos la partición utilizando el resto del espacio disponible. 
+Por el contrario, debemos dimensionar esta nueva partición utilizando un tamaño en Megabytes (por ejemplo).
+
+Nueva particion "n", primaria "p", numero "3", tamaño "+(1024 * X)M".
+Ingresar "t" para cambiar formato, elegir particion "3", indicar formato "83", imprimir la tabla "p".
+
+    fdisk /dev/sda
+    1024 x N
+
+Corroborar que queden iguales con
+
+    fdisk -l
+
+Si todo está ok, guardar cambios.
+
+* Formatear la nueva particion en cada server: 
+
+    `mke2fs -j /dev/sda3`
+    `dd if=/dev/zero bs=1M count=1 of=/dev/sda3; sync`
+
+- Configurar `/etc/drbd.conf` en el nodo 1.
+
+```
+global { usage-count no; }
+resource r0 {
+protocol C;
+startup { wfc-timeout 10; degr-wfc-timeout 30; }
+disk { on-io-error detach; }
+net {
+        after-sb-0pri discard-younger-primary; 
+        after-sb-1pri discard-secondary;
+        after-sb-2pri call-pri-lost-after-sb;
+        cram-hmac-alg "sha1";
+        shared-secret "31asT1X666";
+        }
+
+syncer { rate 100M; }
+on pbxa.example.com {
+        device /dev/drbd0;
+        disk /dev/sda3;
+        address xxx.xxx.xxx.xx1:7788;
+        meta-disk internal;
+        }
+on pbxb.example.com {
+        device /dev/drbd0;
+        disk /dev/sda3;
+        address xxx.xxx.xxx.xx2:7788;
+        meta-disk internal;
+        } 
+}
+```
+
+Donde xxx.xxx.xx1 es la IP del la interfaz de cluster del server 1 y xxx.xxx.xxx.xx2 es la del server 2.
+
+* Copiar el archivo generado desde el nodo 1 al nodo 2.
+
+    `scp /etc/drbd.conf root@pbxb.example.com:/etc/`
+
+* Inicializar el sector del disco DRBD (metadata). En ambos nodos ejecutar:
+
+    `drbdadm create-md r0`
+
+* Levantar el servicio DRBD. En ambos nodos: 
+
+    `service drbd start`
+    
+* Comprobar si ambos servers están como "secundarios". En ambos nodos: 
+
+    `cat /proc/drbd`
+
+Deberíamos observar los dos en secondary/secondary
+
+* Ahora vamos a iniciar como nodo primario al pbxa.
+
+**Solo en el pbxa:** 
+
+    drbdadm -- --overwrite-data-of-peer primary r0
+
+En el **nodo pbxb** se puede comprobar la sincronización: 
+
+    cat /proc/drbd
+    
+* Ahora vamos a formatear el nuevo device `/dev/drbd0` y vamos a montarlo en un directorio `/replica` que vamos a crear.
+
+**En ambos nodos:**
+
+    mkdir /replica
+
+**Solo en el pbxa:**
+
+    mkfs.ext3 /dev/drbd0
+    tune2fs -c 0 -i 0 /dev/drbd0
+    mount /dev/drbd0 /replica
+    
+* Comprobamos el rol de cada nodo, el pbxa debería arrojar: `Primary/Secondary` y el pbxb: `Secundary/Primary`
+
+    `drbdadm role r0`
+
+* Replicar directorios y archivos del sistema en el nodo a
+
+```
+cd /replica
+tar czvf etc-asterisk.tgz /etc/asterisk
+tar czvf etc-asterisk.elastix.tgz /etc/asterisk.elastix
+tar czvf opt-lcdelastix.tgz /opt/lcdelastix
+tar czvf usr-lib-asterisk.tgz /usr/lib64/asterisk
+tar czvf var-lib-asterisk.tgz /var/lib/asterisk
+tar czvf var-lib-mysql.tgz /var/lib/mysql
+tar czvf var-www.tgz /var/www
+tar czvf var-spool-asterisk.tgz /var/spool/asterisk
+tar czvf tftpboot.tgz /tftpboot
+
+tar xzvf etc-asterisk.tgz
+tar xzvf etc-asterisk.elastix.tgz
+tar xzvf opt-lcdelastix.tgz
+tar xzvf usr-lib-asterisk.tgz
+tar xzvf var-lib-asterisk.tgz
+tar xzvf var-lib-mysql.tgz
+tar xzvf var-www.tgz
+tar xzvf var-spool-asterisk.tgz
+tar xzvf tftpboot.tgz
+cp -p /etc/odbc.ini /replica
+cp -p /etc/amportal.conf /replica
+cp -p /etc/freepbx.conf /replica
+
+rm -rf /etc/asterisk
+rm -rf /etc/asterisk.elastix
+rm -rf /opt/lcdelastix
+rm -rf /usr/lib64/asterisk
+rm -rf /var/lib/asterisk
+rm -rf /var/lib/mysql
+rm -rf /var/www
+rm -rf /var/spool/asterisk
+rm -rf /tftpboot
+rm -rf /etc/odbc.ini 
+rm -rf /etc/amportal.conf 
+rm -rf /etc/freepbx.conf 
+
+ln -s /replica/etc/asterisk /etc/asterisk
+ln -s /replica/etc/asterisk.elastix /etc/asterisk.elastix
+ln -s /replica/opt/lcdelastix /opt/lcdelastix
+ln -s /replica/usr/lib64/asterisk /usr/lib64/asterisk
+ln -s /replica/var/lib/asterisk /var/lib/asterisk
+ln -s /replica/var/lib/mysql /var/lib/mysql
+ln -s /replica/var/www /var/www
+ln -s /replica/var/spool/asterisk /var/spool/asterisk
+ln -s /replica/tftpboot /tftpboot
+ln -s /replica/odbc.ini /etc/odbc.ini 
+ln -s /replica/amportal.conf /etc/amportal.conf 
+ln -s /replica/freepbx.conf /etc/freepbx.conf 
+```
+
+* Bajar servicios
+
+```
+service httpd stop
+service asterisk stop
+service mysqld stop
+```
+    
+* Cambiar el nodo b a primario y trabajar sobre la réplica
+    
+**En pbxa:**
+
+    umount /replica
+    drbdadm secondary r0
+    
+**En pbxb:**
+ 
+    drbdadm primary r0
+    mount /dev/drbd0 /replica
+    ls /replica/
+    
+**En ambos comprobar roles:** 
+
+    drbdadm role r0
+    
+* Trabajar sobre la replicación de archivos.
+
+```
+rm -rf /etc/asterisk
+rm -rf /etc/asterisk.elastix
+rm -rf /opt/lcdelastix
+rm -rf /usr/lib64/asterisk
+rm -rf /var/lib/asterisk
+rm -rf /var/lib/mysql
+rm -rf /var/www
+rm -rf /var/spool/asterisk
+rm -rf /tftpboot
+rm -rf /etc/odbc.ini 
+rm -rf /etc/amportal.conf 
+rm -rf /etc/freepbx.conf 
+
+ln -s /replica/etc/asterisk /etc/asterisk
+ln -s /replica/etc/asterisk.elastix /etc/asterisk.elastix
+ln -s /replica/opt/lcdelastix /opt/lcdelastix
+ln -s /replica/usr/lib64/asterisk /usr/lib64/asterisk
+ln -s /replica/var/lib/asterisk /var/lib/asterisk
+ln -s /replica/var/lib/mysql /var/lib/mysql
+ln -s /replica/var/www /var/www
+ln -s /replica/var/spool/asterisk /var/spool/asterisk
+ln -s /replica/tftpboot /tftpboot
+ln -s /replica/odbc.ini /etc/odbc.ini 
+ln -s /replica/amportal.conf /etc/amportal.conf 
+ln -s /replica/freepbx.conf /etc/freepbx.conf 
+```
+
+* Bajar servicios
+
+    `service mysqld stop`
+    `service httpd stop`
+    `service asterisk stop`
+    
+* Volver al pbxa como primario
+
+**En pbxb:**
+
+    umount /replica
+    drbdadm secondary r0
+    
+**En pbxa**
+
+    drbdadm primary r0
+    mount /dev/drbd0 /replica
+    ls /replica/
+    
+**En ambos: **
+
+    drbdadm role r0
+
+
+* Configuración de Heartbeat
+
+Desactivo y bajo los servicios que va a manejar HA (en ambos nodos) 
+
+    chkconfig asterisk off 
+    chkconfig mysqld off 
+    chkconfig httpd off 
+    service mysqld stop 
+    service asterisk stop 
+    service httpd stop
+
+* Crear el archivo `/etc/ha.d/ha.cf` con el siguiente contenido:
+
+    ```
+    debugfile /var/log/ha-debug
+    logfile /var/log/ha-log
+    logfacility local0 
+    keepalive 2
+    deadtime 30
+    warntime 10
+    initdead 120
+    udpport 694
+    bcast eth1 
+    auto_failback off
+    node pbxa.example.com
+    node pbxb.example.com
+    ```
+
+* Crear el archivo `/etc/ha.d/authkeys` con el sgte contenido:
+
+    `auth 1`
+    `1 sha1 MySecret`    
+
+* Asignar permisos: 
+
+    `chmod 600 /etc/ha.d/authkeys`
+
+* Crear el archivo /etc/ha.d/haresources con el sgte contenido:
+
+    `pbxa.example.com drbddisk::r0 `
+    `dev/drbd0::/replica::ext3`
+    `IPaddr::xxx.xxx.xxx.xxx/24/eth0/xxx.xxx.xxx.255 mysqld asterisk httpd`
+
+Donde xxx.xxx.xxx.xxx es la IP flotante del cluster y xxx.xxx.xxx.255 es la IP de broadcast.
+
+* Copiar los archivos de HA en el nodo pbxb
+
+    `scp /etc/ha.d/ha.cf /etc/ha.d/authkeys /etc/ha.d/haresources root@pbxb.example.com:/etc/ha.d/`
+    
+* Levantar heartbeat en ambos nodos y dejarlo para que levante en el runlevel 3
+
+    `service heartbeat start`
+    `chkconfig heartbeat on`
+
+Reboot en ambos servidores y el cluster debería comenzar a funcionar.
+
+*NOTA:* ojo con el archivo: `/etc/ha.d/ha.cf` y `/etc/ha.d/haresources` ya que llevan el nombre de la interfaz eth (eth0, eth1, etc.)
+Debe llevar la eth de replicacion.
+
+*NOTA2:* tener el cuenta el parámetro BINDADDR en Freepbx, debe tener la IP flotante.
+
+---
 
