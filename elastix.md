@@ -844,3 +844,27 @@ La capa de particiones debe quedar "exacta" en ambos nodos, con mismo valor de e
 
 ---
 
+###Comandos útiles en Elastix {#comandosutiles}
+
+`asterisk -rx ' sip show peers'`
+`asterisk -rx 'dahdi show channels'`
+`asterisk -rx 'core show channels'`	---> `asterisk -rx 'core show channels'|awk -F"/" '{print $1}'|grep "DAHDI"|wc -l`
+`lsdahdi`	---> `lsdahdi|grep " ACTIVE"|wc -l`				| Correspondencia
+`asterisk -rx 'queue show 9082'`
+
+Asterisk Manager esucha en el puerto 5038
+El proceso op_server.pl corresponde al FOP.
+
+```
+; The next three params are for debuging, you can disable when in production
+
+mfcr2_call_files=yes
+mfcr2_logdir=oi
+mfcr2_logging=all 
+```
+
+El cliente también puede ingresar a la interfaz web y gestionar sus mensajes de voz de alli y por supuesto desde un teléfono interno (como todas las centrales) discando al *98
+
+`asterisk -rx 'module reload app_queue.so'` ---> Recarga la configuración de colas
+
+---

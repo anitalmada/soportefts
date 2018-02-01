@@ -32,7 +32,7 @@
   * [Backup and restore de Elastix](./elastix.md#bckuprestore)
   * [Cluster de 64bits](./elastix.md#cluster)
   * [Cluster HA - Particionado de disco](./elastix.md#clusterparticionado)
-  
+  * [Comandos útiles en Elastix](./elastix.m#comandosutiles)
   
   
 
