@@ -868,3 +868,123 @@ El cliente también puede ingresar a la interfaz web y gestionar sus mensajes de
 `asterisk -rx 'module reload app_queue.so'` ---> Recarga la configuración de colas
 
 ---
+###Consulta sqlite para ver los vendors soportados {#consultavendors}
+
+    sqlite3 /var/www/db/endpoint.db "select vendor.name , model.name from model , vendor where model.id_vendor = vendor.id order by vendor.name;"
+    
+---
+###DUNDi - Arreglar conexionaes a nivel sqlite {#dundisqlite}
+
+En el servidor central del cliente, eliminé el peer en la base de datos:
+
+```
+[root@pbxcliente ~]# cd /var/www/db/
+[root@pbxcliente db]# sqlite3 elastixconnection.db
+SQLite version 3.3.6
+Enter ".help" for instructions
+
+sqlite> .databases
+seq  name             file
+---  ---------------  ----------------------------------------------------------
+0    main             /var/www/db/elastixconnection.db
+
+sqlite> .tables
+general    parameter  peer
+
+sqlite> select * from peer where host='10.4.70.250';
+46|a0:98:05:01:d7:13|symmetric|10.4.xxx.xxx|CERxxxxxxxxxxxx|CERxxxxxxxxxxxx|connected|-----BEGIN PUBLIC KEY-----
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+-----END PUBLIC KEY-----
+|Nombre de Cliente|sigla|connected
+
+sqlite> delete from peer where id='46';
+```
+
+Una vez eliminado en base de datos, deja de aparecer a nivel web el nodo. Recién ahí, me voy al nodo remoto y genero una nueva conexión, y acepto en el servidor central.
+Sin embargo, queda en estado "Conectando...", por lo que vuelvo a editar el peer en base de datos, en el nodo remoto:
+
+```
+[root@elx keys]# cd /var/www/db/
+[root@elx db]# sqlite3 elastixconnection.db
+SQLite version 3.3.6
+Enter ".help" for instructions
+
+sqlite> .databases
+seq  name             file
+---  ---------------  ----------------------------------------------------------
+0    main             /var/www/db/elastixconnection.db
+
+sqlite> .tables
+general    parameter  peer
+
+sqlite> select * from general;
+1|XXX|CABA|BsAs|Argentina|tecnologia@example.com.ar|011XXXXXXX|Tecnologia|CERXXXXXXXXXXXX|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+sqlite> select * from peer;
+1||symmetric|10.4.Xx.xX||CERXXXXXXXXXXXX|waiting response||||Requesting connection
+
+sqlite> .schema
+CREATE TABLE general(
+       id           INTEGER PRIMARY KEY,
+       organization varchar(100),
+       locality     varchar(100),
+       stateprov    varchar(150),
+       country      varchar(150),
+       email        varchar(150),
+       phone        varchar(20),
+       department   varchar(255),
+       certificate  varchar(255)
+, secret text);
+CREATE TABLE parameter(
+       id           INTEGER PRIMARY KEY,
+       name         varchar(255),
+       value        varchar(255),
+       id_peer      integer,
+       foreign key(id_peer) references peer(id)
+);
+CREATE TABLE peer(
+       id           INTEGER PRIMARY KEY,
+       mac          varchar(255),
+       model        varchar(255),
+       host         varchar(255),
+       inkey        varchar(255),
+       outkey       varchar(255),
+       status       varchar(25)  default 'connect',
+       key          text,
+       comment      text,
+       company      varchar(250),
+       his_status   varchar(255) default 'disconnected'
+);
+
+sqlite> update peer set mac = 'Xc:Xe:8X:Xd:2X:XX' where id = 1;
+sqlite> update peer set inkey = 'CERXXXXXXXXXXXXX' where id = 1;
+sqlite> update peer set status = 'connected' where id = 1;
+sqlite> update peer set his_status = 'connected' where id = 1;
+
+sqlite> select * from peer;
+1|Xc:Xe:8X:Xd:2X:XX|symmetric|10.4.XX.XX|CER6XXXXXXXXXXX|CERXXXXXXXXXXXXX|connected||||connected
+
+sqlite> .exit
+
+[root@elx ~]# cd /var/lib/asterisk/keys/
+[root@elx keys]# ls -l
+total 12
+-rw-r--r-- 1 asterisk asterisk 891 sep 14 07:51 CERXXXXXXXXXXXXX.key
+-rw-r--r-- 1 asterisk asterisk 272 sep 14 07:51 CERXXXXXXXXXXXXX.pub
+```
+
+Me traje la key pública de Casa Central y lo pegué en éste directorio:
+
+```
+[root@elx keys]# ls -l
+total 12
+-rw-r--r-- 1 asterisk asterisk 272 sep 14 11:53 CERXXXXXXXXXXXXX.pub
+-rw-r--r-- 1 asterisk asterisk 891 sep 14 07:51 CERXXXXXXXXXXXXX.key
+-rw-r--r-- 1 asterisk asterisk 272 sep 14 07:51 CERXXXXXXXXXXXXX.pub
+
+[root@elx keys]# cat CERXXXXXXXXX.pub
+-----BEGIN PUBLIC KEY-----
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+-----END PUBLIC KEY-----
+```
+

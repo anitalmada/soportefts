@@ -33,6 +33,9 @@
   * [Cluster de 64bits](./elastix.md#cluster)
   * [Cluster HA - Particionado de disco](./elastix.md#clusterparticionado)
   * [Comandos útiles en Elastix](./elastix.m#comandosutiles)
+  * [Consulta sqlite para ver los vendors soportados](./elastix.md#consultavendors)
+  * [DUNDi - Arreglar conexionaes a nivel sqlite](./elastix.md#dundisqlite)
+  * 
   
   
 
