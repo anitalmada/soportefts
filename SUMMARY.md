@@ -37,6 +37,7 @@
   * [DUNDi - Arreglar conexionaes a nivel sqlite](./elastix.md#dundisqlite)
   * [Extensión de prueba](./elastix.md#extensiontest)
   * [FXOtune](./elastix.md#fxotune)
+  * [Grabar todas las llamadas entrantes por un DID particular](./elastix.md#grabarllamxdid)
   
   
 

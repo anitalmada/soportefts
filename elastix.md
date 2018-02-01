@@ -1038,5 +1038,56 @@ Volvemos a cargar los resultados para ver si estos bajaron los niveles de eco.
 Nota: Es necesario ejecutar `fxotune -s` después de cada test
 
 ---
+###Grabar todas las llamadas entrantes por un DID particular {#grabarllamxdid}
+
+Se tiene una ruta entrante, con el DID 9342, y sin importar a dónde vaya, se debe grabar la conversación completa y enviar un mail con el audio adjunto.
+
+En el archivo `/etc/asterisk/extensions_custom.conf`:
+
+```
+[from-pstn-custom]
+exten => 9342,1,Set(Fecha=${STRFTIME(${EPOCH},,%Y%m%d-%H%M%S)})
+exten => 9342,n,Set(Grabacion=/tmp/Recording-${Fecha}-${EXTEN}-${CALLERID(number)}.wav)
+exten => 9342,n,MixMonitor(${Grabacion},bm(3999@default),/var/lib/asterisk/bin/ModoGrabarOn.sh ${Grabacion})
+exten => 9342,n,Goto(ext-did-0002,9342,1)
+```
+
+Creamos el script `/var/lib/asterisk/bin/ModoGrabarOn.sh`:
+
+```
+#!/bin/bash
+
+# Inicialización de variables
+Lame="`which lame`"
+Mimesend="`which mimesend`"
+Rm="`which rm`"
+
+File=$1
+
+Fecha="`echo ${File}|awk -F"-" '{print $2}'`"
+Hora="`echo ${File}|awk -F"-" '{print $3}'`"
+DID="`echo ${File}|awk -F"-" '{print $4}'`"
+CallerID="`echo ${File}|awk -F"-" '{print $5}'| awk -F"." '{print $1}'`"
+
+Filemp3="`echo ${File}| awk -F"." '{print $1}'`"
+
+To="rodrigo.montiel@freetechsolutions.com.ar"
+Subject="Recorded call '$CallerID'"
+#############################
+
+touch /tmp/${CallerID}.txt
+echo "From: $CallerID" >> /tmp/${CallerID}.txt
+echo "To: $DID" >> /tmp/${CallerID}.txt
+echo "Date: $Fecha $Hora" >> /tmp/${CallerID}.txt
+
+${Lame} --silent -m m -b 8 --tt ${File} --add-id3v2 ${File} ${Filemp3}.mp3
+
+sleep 5
+
+${Mimesend} -t ${To} -s "${Subject}" -f /tmp/${CallerID}.txt -f ${Filemp3}.mp3
+
+${Rm} -f /tmp/${CallerID}.txt
+${Rm} -f ${File}
+```
 
 
