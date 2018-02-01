@@ -26,4 +26,6 @@
   * [Asternic PRO - Instalación](./asternic.md#asternicpro)
   * [Reinserción de datos en la base qstats](./asternic.md#reinserciondatos)
 * [Elastix](elastix.md)
+  * [Elastix - Actualización de repositorios para que funcionen los updates](./elastix.md#actualizarepos)
+  
 
