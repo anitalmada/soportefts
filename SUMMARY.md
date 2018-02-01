@@ -30,6 +30,7 @@
   * [Analizar colas de mails](./elastix.md#colasmails)
   * [Arreglar los faxes virtuales cuando dejan de funcionar](./elastix.md#arreglarfax)
   * [Backup and restore de Elastix](./elastix.md#bckuprestore)
+  * [Cluster de 64bits](./elastix.md#cluster)
   
   
 
