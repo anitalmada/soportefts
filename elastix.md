@@ -1104,4 +1104,28 @@ ${Rm} -f ${File}
     module reload chan_dahdi.so
 
 ---
+###Habilitar log en Elastix 2.5 {#logelastix25}
+
+For the log work after upgrade you must put `VERBOSITY=3` in `/etc/sysconfig/asterisk` file
+
+    echo 'VERBOSITY=3' >> /etc/sysconfig/asterisk
+
+After restart asterisk with `/etc/init.d/asterisk restart`
+
+For amportal restart works too, you must edit the file `/var/lib/asterisk/bin/freepbx_engine`
+
+```
+/usr/sbin/safe_asterisk -U $AMPASTERISKUSER -G $AMPASTERISKGROUP 2>&1 >/dev/null
+```
+
+by
+
+```
+/usr/sbin/safe_asterisk -U $AMPASTERISKUSER -G $AMPASTERISKGROUP -v -v -v 2>&1 >/dev/null
+```
+
+`core restart` now don't do anything
+
+---
+
 

@@ -39,5 +39,6 @@
   * [FXOtune](./elastix.md#fxotune)
   * [Grabar todas las llamadas entrantes por un DID particular](./elastix.md#grabarllamxdid) 
   * [Habilitar detección de cortes en placas con puertos FXO](./elastix.md#deteccióncortefxo)
+  * [Habilitar log en Elastix 2.5](./elastix.md#logelastix25)
   
 
