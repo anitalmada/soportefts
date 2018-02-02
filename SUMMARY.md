@@ -41,6 +41,10 @@
   * [Habilitar detección de cortes en placas con puertos FXO](./elastix.md#deteccióncortefxo)
   * [Habilitar log en Elastix 2.5](./elastix.md#logelastix25)
   * [Habilitar transferencia en llamadas salientes](./elastix.md#habilitartransfer)
+  * [Habilitar usuario para ver todas las llamadas](./elastix.md#habuserver)
+  * [HA-Recuperación de splitbrain](./elastix.md#splitbrain)
+  * [Instalar custom context en Elastix](./elastix.md#customcontext)
+  * [Insertar botón Manual Call en el módulo call center](./elastix.md#btnmanualcall)
   
   
 

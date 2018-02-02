@@ -1175,6 +1175,45 @@ FreePBX
 Module Admin ---> Check for updates online ---> Custom contexts ---> Action ---> Download and install ---> Process ---> Confirm ---> Return
 
 ---
+###Insertar botón Manual Call en el módulo call center {#btnmanualcall}
+
+
+1. Moverse a `/var/www/html/modules/agent_console` con cd.
+
+2. Editar el `index.php` bajo el comentario     `// Acciones para mostrar la pantalla principal, fuera de cualquier acción AJAX` (en linea 552 aprox.)
+ y agrega " `'BTN_LLAMADA_MANUAL'            =>  _tr('Manual Call')," dentro de $smarty->assing(array( )). Quedando $smarty->assing(array('BTN_LLAMADA_MANUAL' => _tr('Manual Call'),));`
+
+3. Editar `themes/default/agent_console.tpl` y agrega 
+    `<button id="btn_manualcall" class="elastix-callcenter-boton-activo ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">{$BTN_LLAMADA_MANUAL}</span></button>`
+
+4. Agregar las siguientes lineas en `themes/default/js/javascript.js`
+
+```
+    // Pongo en pausa al agente
+ $('#btn_manualcall').click(function() {
+     if($('div[dialog=click2Dial]').length == 0) {
+         $.ajax({
+             url: '/freetech_ccenter/getForm.php',
+             success: function(data) {
+                          $('<div />').attr('dialog', 'click2Dial').html(data).dialog({
+                          title: 'Freetech Solutions | click2Dial',
+                          width: 'auto',
+                          height: 'auto',
+                          close: function(event, ui) {
+                                     $(this).dialog('destroy').remove();
+                                 }
+                          });
+                     }
+         });
+     }
+});
+```
+
+5. Agregar los archivos php en `/var/www/html/freetech_ccenter/`
+
+6. Setear las credenciales de MySQL y AMI en el archivo `config.php`
+
+---
 
 
 
