@@ -1127,5 +1127,58 @@ by
 `core restart` now don't do anything
 
 ---
+###Habilitar transferencia en llamadas salientes {#habilitartransfer}
+
+En PBX ---> Configuración PBX ---> Configuración general, agregar la opción T en "Asterisk Outbound Dial Command options".
+
+---
+###Habilitar usuario para ver todas las llamadas {#habuserver}
+
+```
+rwxr-xr-x 1 root root  53K Jan 30 13:39 paloSantoACL.class.php
+-rwxr-xr-x 1 root root  53K May 24 10:38 paloSantoACL.class.php_24May2013_bkp
+```
+
+    [root@user libs]# pwd
+    /var/www/html/libs
+
+```
+/**
+     * Procedimiento para saber si un usuario (login) pertenece al grupo administrador
+     *
+     * @param string   $username  Username del usuario
+     *
+     * @return boolean true or false
+     */
+    function isUserAdministratorGroup($username)
+    {
+        $is=false;
+        $idUser = $this->getIdUser($username);
+        if($idUser){
+            $arrGroup = $this->getMembership($idUser);
+            //$is = array_key_exists('administrator',$arrGroup);
+            $is = array_search('1', $arrGroup);
+            if ($username == "jpalotes") $is=1; //aca agregue el usuario de Juan de los Palotes   <--------- Esta línea se debe agregar
+        }
+        return $is;
+    }
+```
+---
+###HA-Recuperación de splitbrain {#splitbrain}
+
+http://www.ipserverone.info/dedicated-server/linux-2/how-to-fix-drbd-recovery-from-split-brain/
+
+---
+###Instalar custom context en Elastix {#customcontext}
+
+FreePBX
+Module Admin ---> Check for updates online ---> Custom contexts ---> Action ---> Download and install ---> Process ---> Confirm ---> Return
+
+---
+
+
+
+
+
 
 
