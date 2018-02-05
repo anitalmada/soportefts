@@ -60,5 +60,8 @@
   * [Fail2ban](./freepbx.md#fail2ban)
   * [Recargar FreePBX por consola](./freepbx.md#descargabash)
   * [Unable to generate MOTD on new install](./freepbx.md#motd)
-  
+* [Gateways](gateways.md)
+  * [Detección de cortes en GW Dinstar FXO](./gateways.md#cortesdinstar)
+  * [GW Grandstream FXO - Discado a la PSTN con tomando línea con 0](./gateways.md#discadograndstream)
+  * [Grandstream - Sincronizar el phonebook](./gateways.md#sincrophonebook)
 
