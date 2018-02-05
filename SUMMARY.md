@@ -64,4 +64,8 @@
   * [Detección de cortes en GW Dinstar FXO](./gateways.md#cortesdinstar)
   * [GW Grandstream FXO - Discado a la PSTN con tomando línea con 0](./gateways.md#discadograndstream)
   * [Grandstream - Sincronizar el phonebook](./gateways.md#sincrophonebook)
+* [ICS](ics.md)
+  * [Crear usuario nuevo para gestión](./ics.md#crearuser)
+  * [Error en reportes de campaña sobre horario recibida](./ics.md#bugreporte)
+  * [Instalación de ICS](ics.md#install)
 
