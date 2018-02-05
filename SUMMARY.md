@@ -53,4 +53,12 @@
   * [Convertir archivos de audio para ser utilizados por Elastix](./elastix.md#sox)
 * [FreePBX](freepbx.md)
   * [Agregar rtptimeout en FreePBX](./freepbx#rtptimeout)
+  * [Cambiar contraseña de administrador por web](./freepbx.md#passweb)
+  * [Conversion tool](./freepbx.md#conversiontool)
+  * [Crear múltiples extensiones desde FreePBX](./freepbx.md#bulkextensions)
+  * [Detección de placas por comando](./freepbx.md#deteccionplacas)
+  * [Fail2ban](./freepbx.md#fail2ban)
+  * [Recargar FreePBX por consola](./freepbx.md#descargabash)
+  * [Unable to generate MOTD on new install](./freepbx.md#motd)
+  
 
