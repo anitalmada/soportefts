@@ -1214,6 +1214,75 @@ Module Admin ---> Check for updates online ---> Custom contexts ---> Action --->
 6. Setear las credenciales de MySQL y AMI en el archivo `config.php`
 
 ---
+###Marcar una ruta entrante con un AccountCode {#accountcode}
+
+```
+[from-pstn-custom]
+exten => 03515690639,1,Set(CDR(accountcode)=Landing)
+exten => 03515690639,n,Goto(ext-did-0002,03515690639,1)
+```
+---
+###Medir las cadencias {#cadencias}
+
+    ~#amportal stop
+
+    ~#fxotune -d -b 1
+    d=dump results
+    i=calibrate echo settings
+    b= device (cat /proc/dahdi/X)
+
+    Dumping module /dev/dahdi/1
+
+    echo ratio = 0.2886 (1305.9 / 4557.0)
+    Done!
+
+    Dumping module /dev/dahdi/2
+    echo ratio = 0.3889 (1544.3 / 4557.0)
+    Done!
+
+    ~#fxotune -i 5
+    i = calibrate echo settings
+    5= string to dial to clear the line, default is 5
+
+    ~#fxotune -s
+    s=set calibrated settings
+
+Volvemos a cargar los resultados para ver si estos bajaron los niveles de eco.
+
+    Dumping module /dev/dahdi/1
+    echo ratio = 0.0096 (51.9 / 4457.0)
+    Done!
+
+    Dumping module /dev/dahdi/2
+    echo ratio = 0.0068 (43.7 / 4457.0)
+    Done!
+
+    ~#amportal start
+
+Nota: Es necesario ejecutar `fxotune -s` después de cada test
+
+---
+###Creación de listas de correo {#listasmail}
+
+1. Creación del dominio.
+2. Creación de una cuenta: vfax_cliente@pbxcliente.com y elastix@pbxcliente.com.
+3. Creación de una lista: vfax_cliente_list@pbxcliente.com. Se agregan los miembros, donde sí o sí tiene que haber un miembro que sea parte del dominio local. Por ejemplo:
+
+ 	fernando.montiel@freetechsolutions.com.ar
+  	vfax_cliente@pbxcliente.com
+  	elastix@pbxcliente.com
+
+4. Agregar un remote SMTP.
+5. En `/etc/postfix/main.cf`, agregué la siguiente línea:
+
+    virtual_alias_maps = hash:/etc/postfix/virtual
+
+6. `service postfix restart`
+7. En Fax ---> Email Template, el remitente tiene que formar parte de la lista.
+
+---
+
+
 
 
 

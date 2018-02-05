@@ -45,7 +45,9 @@
   * [HA-Recuperación de splitbrain](./elastix.md#splitbrain)
   * [Instalar custom context en Elastix](./elastix.md#customcontext)
   * [Insertar botón Manual Call en el módulo call center](./elastix.md#btnmanualcall)
-  
+  * [Marcar una ruta entrante con un AccountCode](./elastix.md#accountcode)
+  * [Medir las cadencias](./elastix.md#cadencias)
+  * [Creación de listas de correo](./elastix.md#listasmail)
   
   
 
