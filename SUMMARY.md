@@ -37,7 +37,7 @@
   * [DUNDi - Arreglar conexionaes a nivel sqlite](./elastix.md#dundisqlite)
   * [Extensión de prueba](./elastix.md#extensiontest)
   * [FXOtune](./elastix.md#fxotune)
-  * [Grabar todas las llamadas entrantes por un DID particular](./elastix.md#grabarllamxdid) 
+  * [Grabar todas las llamadas entrantes por un DID particular](./elastix.md#grabarllamxdid)
   * [Habilitar detección de cortes en placas con puertos FXO](./elastix.md#deteccióncortefxo)
   * [Habilitar log en Elastix 2.5](./elastix.md#logelastix25)
   * [Habilitar transferencia en llamadas salientes](./elastix.md#habilitartransfer)
@@ -51,6 +51,6 @@
   * [Skin Neo en Elastix 2.5](./elastix.md#skinneo)
   * [SMTP relay con Gmail](./elastix.md#smtprelay)
   * [Convertir archivos de audio para ser utilizados por Elastix](./elastix.md#sox)
-  
-  
+* [FreePBX](freepbx.md)
+  * [Agregar rtptimeout en FreePBX](./freepbx#rtptimeout)
 
