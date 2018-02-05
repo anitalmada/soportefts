@@ -48,6 +48,9 @@
   * [Marcar una ruta entrante con un AccountCode](./elastix.md#accountcode)
   * [Medir las cadencias](./elastix.md#cadencias)
   * [Creación de listas de correo](./elastix.md#listasmail)
+  * [Skin Neo en Elastix 2.5](./elastix.md#skinneo)
+  * [SMTP relay con Gmail](./elastix.md#smtprelay)
+  * [Convertir archivos de audio para ser utilizados por Elastix](./elastix.md#sox)
   
   
 

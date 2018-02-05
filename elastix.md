@@ -1281,9 +1281,68 @@ Nota: Es necesario ejecutar `fxotune -s` después de cada test
 7. En Fax ---> Email Template, el remitente tiene que formar parte de la lista.
 
 ---
+###Skin Neo en Elastix 2.5 {#skinneo}
+
+Para volver al skin anterior en Elastix 2.5:
+
+    yum -y install elastix-framework-themes-extra
+
+Luego, volver a elegir el skin que tenía antes.
+
+---
+###SMTP relay con Gmail {#smtprelay}
+
+Ingresar en Elastix a la opción --> Correo Electrónico --> SMTP Remoto
+
+Colocar en modo "ON" y completar con los siguientes datos:
+* Servidor SMTP: GMAIL
+* Dominio: smtp.gmail.com
+* Puerto: 587
+* Usuario: fts.soporte@gmail.com
+
+Tildar la casilla de "Habilitar TLS" y solicitar contraseña al equipo de soporte.
+
+---
+###Convertir archivos de audio para ser utilizados por Elastix {#sox}
+
+Se puede convertir archivos de Elastix de formato alaw a wav
+
+    asterisk -r
+    file converter /tmp/audio.alaw /tmp/audio.wav
 
 
+También se puede usar mpg123:
 
+Convertir MP3 a WAV: 
+
+    mpg123 -b 10000 -s entrada.mp3 | sox -t raw -r 44100 -s -w -c2 – salida.wav
+
+Convertir WAV a ALAW:
+
+    sox entrada.wav -t raw -r 8000 -c 1 -b 8 -A salida.alaw
+
+Convertir WAV a ULAW:
+
+    sox entrada.wav -t raw -r 8000 -c 1 -b 8 -U salida.ulaw
+
+Convertir WAV a GSM:
+
+    sox entrada.wav -t gsm -r 8000 -c 1 -b salida.gsm
+
+Convertir WAV a G.729:
+
+    sox entrada.wav -t raw -r 8000 -c 1 -b 8 -A salida.alaw && asterisk -rx ‘file convert salida.alawsalida.g729‘
+
+
+Comandos definitivos que se han probado:
+
+Aumentar volumen de archivo de audio: 
+
+    sox -v 5.0 nombrearchivo.wav Nuevo.wav
+    
+Convertir archivo de audio al formato de Elastix: 
+
+    sox nombrearchivo.wav -r 8000 -c 1 -e signed-integer nombrearchivo\ resampleado.wav
 
 
 
