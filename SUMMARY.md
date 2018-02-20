@@ -100,6 +100,13 @@
   * [Tiempo máximo de ejecución en PHP](./linux.md#phpmaxtime)
   * [Túneles SSH](./linux.md#tunelssh)
   * [Vlan](./linux.md#vlan)
+* [Mikrotik](mikrotik.md)
+  * [Cargar las reglas generales del firewall](./mikrotik.md#loadfw)
+  * [Crear usuarios para VPN](./mikrotik.md#addusersvpn)
+  * [Crear VPN para OpenVPN](./mikrotik.md#openvpn)
+  * [DynDNS - Script para actualización automática de IP](./mikrotik.md#iprefresh)
+  * [Estadísticas de tráfico](./mikrotik.md#stats)
+  * [Redirección de puertos](./mikrotik.md#portredirect)
 * [MySQL](mysql.md)
   * [Comandos generales](./mysql.md#commands)
   * [Crear usuario para conectarse remotamente](./mysql.md#userremote)
@@ -110,6 +117,5 @@
 * [Queuemetrics](queuemetrics.md)
   * [Configurar teléfonos WebRTC](./queuemetrics.md#webrtcphones)
   * [Logs](./queuemetrics.md#queuemetricslogs)
-* [Teléfonos](telefonos.md)
-  * [Hotline en los Sendos](./telefonos.md#hotlinesendos)
-  * [Upgrade de firmware a través de POST MODE](./telefonos.md#upgradepostmode)
+* Mikrotik
+
