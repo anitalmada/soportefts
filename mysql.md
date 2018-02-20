@@ -207,4 +207,8 @@ GRANT ALL ON . TO 'myuser'@'localhost';
 GRANT ALL ON . TO 'myuser'@'%';
 ```
 ---
+###Reparar todas las bases de datos {#repairdb}
 
+    mysqlcheck -u root -p --repair --all-databases
+
+---
