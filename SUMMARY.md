@@ -107,3 +107,6 @@
 * [Nagios](nagios.md)
   * [Instalación en CentOS](./nagios.md#nagiosinstall)
   * [Instalación de pnp4nagios en Centos](./nagios.md#php4nagios)
+* [Queuemetrics](queuemetrics.md)
+  * [Configurar teléfonos WebRTC](./queuemetrics.md#webrtcphones)
+* [Logs](./queuemetrics.md#queuemetricslogs)
