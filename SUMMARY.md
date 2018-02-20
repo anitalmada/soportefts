@@ -117,5 +117,5 @@
 * [Queuemetrics](queuemetrics.md)
   * [Configurar teléfonos WebRTC](./queuemetrics.md#webrtcphones)
   * [Logs](./queuemetrics.md#queuemetricslogs)
-* Mikrotik
+
 
