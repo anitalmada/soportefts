@@ -104,3 +104,6 @@
   * [Comandos generales](./mysql.md#commands)
   * [Crear usuario para conectarse remotamente](./mysql.md#userremote)
   * [Reparar todas las bases de datos](./mysql.md#repairdb)
+* [Nagios](nagios.md)
+  * [Instalación en CentOS](./nagios.md#nagiosinstall)
+  * [Instalación de pnp4nagios en Centos](./nagios.md#php4nagios)
