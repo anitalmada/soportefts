@@ -101,6 +101,7 @@
   * [Túneles SSH](./linux.md#tunelssh)
   * [Vlan](./linux.md#vlan)
 * [Mikrotik](mikrotik.md)
+  * [Configuración inicial](./mikrotik.md#config)
   * [Cargar las reglas generales del firewall](./mikrotik.md#loadfw)
   * [Crear usuarios para VPN](./mikrotik.md#addusersvpn)
   * [Crear VPN para OpenVPN](./mikrotik.md#openvpn)

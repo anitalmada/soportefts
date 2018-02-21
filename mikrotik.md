@@ -1,3 +1,29 @@
+###Configuración inicial {#config}
+
+Para configurar un router Mikrotik, conectarlo mediante cable de red y seguir las siguientes instrucciones:
+
+1. Descargar la herramienta [winbox (es un archivo .exe)](https://mikrotik.com/download) y en la terminal ejecutar
+
+        wine winbox.exe
+
+  La documentación de winbox está disponible en https://wiki.mikrotik.com/wiki/Manual:Winbox
+2. Una vez que pudimos abrir winbox, en la pestaña `Neighbors` buscar el dispositivo a conectar a través de la MAC. Si no lo permite, se pueden hacer dos cosas: levantar una interfaz virtual o bien cambiar la IP de la interfaz ethernet a una dirección que se encuentre en la misma subred que el router.
+
+3. Agregar las IP correspondientes a las interfaces que necesitamos (LAN y WAN). 
+La interfaz ethernet debe tener la IP que provea el cliente en cuya red se instalará el router. 
+
+4. Verificar que ninguna de las conexiones quede como "Master". Chequear que todas tengan seteado el `Master Port: none`
+
+5. Cambiar la password de administrador yendo a System -> users -> doble click en admin -> editar password
+
+6. Verificar que funciona el acceso web al router, modificando el puerto http a 8081.
+
+7. Para finalizar la configuración agregar la IP pública a la interfaz eth5 del router.
+
+8. Verificar que esté desactivado el servidor DHCP.
+
+9. Configurar el firewall para que natee por eth5, siguiendo los pasos del siguiente apartado.
+
 ###Cargar las reglas generales del firewall {#loadfw}
 
 1) Editar el archivo Firewall-General.rsc, y cargar las redes internas que correspondan.
