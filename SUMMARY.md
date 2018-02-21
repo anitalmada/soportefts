@@ -118,5 +118,7 @@
 * [Queuemetrics](queuemetrics.md)
   * [Configurar teléfonos WebRTC](./queuemetrics.md#webrtcphones)
   * [Logs](./queuemetrics.md#queuemetricslogs)
-
+* [Teléfonos](./telefonos.md)
+  * [Hotline en los Sendos](telefonos.md#hotlinesendos)
+  * [Upgrade de firmware a través de POST MODE](./telefonos.md#upgradepostmode)
 
