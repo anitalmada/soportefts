@@ -115,6 +115,53 @@ Archivos a tener en cuenta:
     /root/.gammurc (archivo para envio)
     /etc/gammu-smsrc (archivo para recepcion)
 
+---
+### Evitar banneo por IMEI {#unbanIMEI}
 
+**1) A nivel del GW GSM**
+
+Se selecciona el menú "Mobile Configuration > IMEI".
+
+![](/assets/imei1.png)
+
+Se selecciona el checkbox _"I have read and I accept the agreement"_, y luego _"IMEI Auto Set"_.
+
+
+Se selecciona la opción _"Enable IMEI Auto Set - Yes"_, y luego _"Save"_.
+
+![](/assets/imei2.png)
+
+Se deja únicamente la policy _"By time"_ con el valor 720, y luego _"Save"_.
+
+![](/assets/imei3.png)
+
+Con éste cambio, se está haciendo que el GW cambie el IMEI de todos sus puertos cada 12 hs.
+
+**2) A nivel del ICS**
+
+
+
+```
+[root@mysql-cliente ~]# vim /home/ftsender/deploy/apidinstar/dinstar/dwgc.py
+
+```
+
+
+Se cambia el valor de la variable "check_timer" de 5 seg. a 40 seg.:
+
+`check_timer = 5.0` ---> **check_timer = 40.0**
+
+Se guardan los cambios y se reinicia el demonio:
+
+
+
+```
+[root@mysql-cliente ~]# /home/ftsender/deploy/apidinstar/dinstar/dwg.py stop
+[root@mysql-cliente ~]# /home/ftsender/deploy/apidinstar/dinstar/dwg.py start
+```
+
+
+
+Con éste cambio, se está haciendo que los SMSs salgan cada 40 seg. en lugar de cada 5 seg. Es decir, se baja la tasa de envío.
 
 
