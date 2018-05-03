@@ -939,6 +939,37 @@ insert into setup (keyword,parameter,value) select 'dict_queue',extension,descr 
 ---
 ### Reinserción de datos en la base qstats {#reinserciondatos}
 
+Puede ocurrir eventualmente que los reportes no muestren llamadas en algún período de tiempo y sin embargo las bases de datos muestren los registros correspondientes a ese lapso. Para corregir esto primero se deben reparar las bases de MySQL:
+
+`mysqlcheck --repair --alldatabases`
+
+Luego se detiene el servicio Asterniclog para hacer el reparseo y que levante los cambios:
+
+`service asterniclog stop`
+
+A continuación se deben revisar los parámetros del archivo de configuración de asterniclog:
+
+`vim /etc/sysconfig/asterniclog`
+
+Ese archivo debe contener la siguiente línea:
+
+`OPTIONS="-u qstatsUser -p qstatsPassw0rd -d qstats -h localhost -l /var/log/asterisk/queue_log -c --daemon"`
+
+Hay dos opciones para reparsear los registros:
+1) Modificar esa línea en el archivo y agregarle el flag -r así:
+
+`OPTIONS="-u qstatsUser -p qstatsPassw0rd -d qstats -h localhost -l /var/log/asterisk/queue_log -c -r --daemon"`
+
+2) Reinsertar manualmente el/los queue_logs de manera individual. Para esto primero hay que verificar cuáles se encuentran disponibles en la carpeta /var/log/asterisk/. Luego se procede a realizar el mismo trabajo que haría el script de sysconfig pero de manera individual, por ejemplo:
+
+`/usr/local/parselog/asterniclog -u qstatsUser -p qstatsPassw0rd -d qstats -h localhost -l /var/log/asterisk/queue_log-20180430 -c -r`
+
+Una vez reparseados todos los registros necesarios, se inicia nuevamente el servicio asterniclog y se verifica que los reportes ya muestren los datos correspondientes:
+
+`service asterniclog start`
+
+### Para versiones anteriores a 2.0.7:
+
 El tailqueuelog no va a tratar de insertar registros anteriores al más reciente registrado (por motivos de eficiencia). Ahora bien, eso impide que se reparseen los eventos viejos que hayan podido perderse por un crash o similar.
 
 Una opción es comentar la linea de tailqueuelog que realiza dicho chequeo por fecha (las versiones más recientes de asternic tienen un proceso de parseo que se llama asterniclog al que se le puede pasar el parámetro -r para que haga el reparseo, sin necesidad de modificar código).
