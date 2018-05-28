@@ -541,7 +541,7 @@ Acá me pasó que al intentar acceder a Asternic por web, me tiraba un error que
 
 - Agregar la siguiente línea al /etc/rc.local:
 
-`cd /usr/local/parselog ; ./tailqueuelogFreePBX28 -u asternic -p 4st3rNIC123 -d qstats -l /var/log/asterisk/queue_log &`
+`cd /usr/local/parselog ; ./tailqueuelogFreePBX28 -u asternic -p la-password -d qstats -l /var/log/asterisk/queue_log &`
 
 - Aplicar el patch, de acuerdo a la versión de FreePBX:
 
@@ -556,7 +556,7 @@ Acá me pasó que al intentar acceder a Asternic por web, me tiraba un error que
 $config{'dbhost'} = 'localhost';
 $config{'dbname'} = 'qstats';
 $config{'dbuser'} = 'asternic';
-$config{'dbpass'} = '4st3rNIC123';
+$config{'dbpass'} = 'tu-password';
 
 # Destination directory for recordings
 $config{'asterisk_spool'}  = "/var/spool/asterisk/monitor";
