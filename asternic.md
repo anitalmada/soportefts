@@ -496,7 +496,7 @@ Para saber cuál es la última versión, directamente voy probando qué tgz logr
 mysqladmin -u root -p create qstats
 cd asternic-stats-pro-2.0.7
 mysql -uroot -p qstats < ./sql/mysql-tables.sql
-GRANT ALL PRIVILEGES ON qstats.* TO 'asternic'@'localhost' IDENTIFIED BY '4st3rNIC123' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON qstats.* TO 'asternic'@'localhost' IDENTIFIED BY 'la-password' WITH GRANT OPTION;
 ```
 
 
